@@ -4,19 +4,15 @@
 	box-sizing: border-box;
 }
 
-body {
-	height: 100vh;
-	width: 100vw;
-}
-
 .background {
-    position: fixed;
+    display: block;
+    margin: auto;
 }
 
 .bird {
-	position: fixed;
-	top: 40vh;
-	left: 40vw;
+	display: block;
+    margin: auto;
+    margin-top: -250px;
 }
 
 .pipe_sprite {
