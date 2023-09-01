@@ -1,0 +1,21 @@
+strong {
+    color: red;
+}
+
+body {
+    text-align: center;
+    background-color: PaleTurquoise;
+    color: RebeccaPurple;
+    font-family: helvetica, arial, sans-serif;
+    margin: 2em;
+}
+
+h1 {
+    font-family: verdana, arial, sans-serif;
+    font-style: bold;
+    color: #373fff;
+}
+
+.hidden {
+    display: none;
+}
