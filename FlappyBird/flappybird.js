@@ -66,9 +66,6 @@ function update()
     //draw bird
     context.drawImage(birdImg, bird.x, bird.y, bird.width, bird.height);
 
-    //draw base
-    context.drawImage(baseImg, 0, boardHeight*25/32, baseImg.width, baseImg.height)
-
     //draw pipes
     for (let i = 0; i < pipeArray.length; i++)
     {
@@ -76,6 +73,9 @@ function update()
         pipe.X += velocityX;
         context.drawImage(pipe.img, pipe.x, pipe.y, pipe.width, pipe.height);
     }
+
+    //draw base
+    context.drawImage(baseImg, 0, boardHeight*25/32, baseImg.width, baseImg.height)
 }
 
 function placePipes() 
@@ -83,7 +83,7 @@ function placePipes()
     let topPipe = 
     {
         img : toppipeImg,
-        x : pipeX,
+        x : pipeX-50,
         y : pipeY,
         width : pipeWidth,
         height: pipeHeight,
@@ -91,4 +91,16 @@ function placePipes()
     }
 
     pipeArray.push(topPipe)
+
+    let botPipe = 
+    {
+        img : botpipeImg,
+        x : pipeX-50,
+        y : pipeY+350,
+        width : pipeWidth,
+        height: pipeHeight,
+        passed : false
+    }
+
+    pipeArray.push(botPipe)
 }
