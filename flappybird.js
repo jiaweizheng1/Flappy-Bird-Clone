@@ -9,6 +9,7 @@ let birdWidth = 34;
 let birdHeight = 24;
 let birdX = boardWidth*3/8;
 let birdY = boardHeight/2;
+let birdImg;
 
 let bird = 
 {
@@ -29,13 +30,13 @@ let toppipeImg;
 let botpipeImg;
 
 //physics
-let velocityX = -2;
+let velocityX = -0.75;
 
 window.onload = function() 
 {
     board = document.getElementById("board");
     board.height = boardHeight;
-    board.boardWidth = boardWidth;
+    board.width = boardWidth;
     context = board.getContext("2d"); //context for drawing on board
 
     //bird
@@ -55,7 +56,7 @@ window.onload = function()
     botpipeImg.src = "sprites/pipe-green-bot.png"
 
     requestAnimationFrame(update);
-    setInterval(placePipes, 1500) //every 1.5 seconds
+    setInterval(placePipes, 1.5 * 1000) //every 1.5 seconds
 }
 
 function update()
@@ -70,7 +71,7 @@ function update()
     for (let i = 0; i < pipeArray.length; i++)
     {
         let pipe = pipeArray[i];
-        pipe.X += velocityX;
+        pipe.x += velocityX;
         context.drawImage(pipe.img, pipe.x, pipe.y, pipe.width, pipe.height);
     }
 
@@ -80,11 +81,14 @@ function update()
 
 function placePipes() 
 {
+    let randompipeY = pipeY - pipeHeight/4 - Math.random()*(pipeHeight/2)
+    let spacing = boardHeight/5
+
     let topPipe = 
     {
         img : toppipeImg,
-        x : pipeX-50,
-        y : pipeY,
+        x : pipeX,
+        y : randompipeY,
         width : pipeWidth,
         height: pipeHeight,
         passed : false
@@ -95,8 +99,8 @@ function placePipes()
     let botPipe = 
     {
         img : botpipeImg,
-        x : pipeX-50,
-        y : pipeY+350,
+        x : pipeX,
+        y : randompipeY + pipeHeight + spacing,
         width : pipeWidth,
         height: pipeHeight,
         passed : false
