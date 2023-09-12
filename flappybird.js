@@ -1,96 +1,108 @@
-//board
+//board and context for drawing
 let board;
-let boardWidth = 288;
-let boardHeight = 512;
 let context;
 
-//bird
-let birdWidth = 34;
-let birdHeight = 24;
-let birdX = boardWidth*3/8;
-let birdY = boardHeight/2;
-let birdImg;
-
+//bird class
 let bird = 
 {
-    x : birdX,
-    y : birdY,
-    width : birdWidth,
-    height : birdHeight
+    x : 0,
+    y : 0,
+    width : 34,
+    height : 24,
+    velocityY: 0,
+    tiltAngle: 0 
 }
 
-//pipes
-let pipeArray = [];
-let pipeWidth = 52;
-let pipeHeight = 320;
-let pipeX = boardWidth;
-let pipeY = 0;
-
-let toppipeImg;
-let botpipeImg;
+//pipes array
+let pipeArray = []; 
 
 //physics
-let velocityX = -0.75;
+let gravity = 0.025;
+
+//volume control
+volume = 0.5;
 
 window.onload = function() 
 {
-    board = document.getElementById("board");
-    board.height = boardHeight;
-    board.width = boardWidth;
-    context = board.getContext("2d"); //context for drawing on board
+    //load night background image
+    //uncessary but may be needed when adding day->night, night->day cycle
+    backgroundImg = new Image();
+    backgroundImg.src = "sprites/background-night.png"
 
-    //bird
+    //context for drawing on board
+    board = document.getElementById("board");
+    board.width = backgroundImg.width;
+    board.height = backgroundImg.height;
+    context = board.getContext("2d");
+
+    //bird image
     birdImg = new Image();
     birdImg.src = "sprites/yellowbird-midflap.png"
 
-    //base
+    //place bird at starting position
+    bird.x = board.width*3/8;
+    bird.y = board.height/2;
+
+    //base image
     baseImg = new Image();
     baseImg.src = "sprites/base.png"
 
-    //top pipe
+    //top pipe image
     toppipeImg = new Image();
     toppipeImg.src = "sprites/pipe-green-top.png"
 
-    //bot pipe
+    //bot pipe image
     botpipeImg = new Image();
     botpipeImg.src = "sprites/pipe-green-bot.png"
 
+    //start animation, draw new pipes, bird jump when key press
     requestAnimationFrame(update);
     setInterval(placePipes, 1.5 * 1000) //every 1.5 seconds
+    document.addEventListener("mousedown", birdJump);
+    document.addEventListener("keydown", birdJump);
 }
 
 function update()
 {
     requestAnimationFrame(update);
-    context.clearRect(0, 0, board.width, board.height);
 
-    //draw bird
-    context.drawImage(birdImg, bird.x, bird.y, bird.width, bird.height);
+    //clear previous pixels to allow for drawing new images
+    context.clearRect(0, 0, board.width, board.height);
 
     //draw pipes
     for (let i = 0; i < pipeArray.length; i++)
     {
         let pipe = pipeArray[i];
-        pipe.x += velocityX;
+        pipe.x += pipe.velocityX;
         context.drawImage(pipe.img, pipe.x, pipe.y, pipe.width, pipe.height);
     }
 
+    //calculate new bird y position after jumping + gravity
+    bird.velocityY += gravity*2;
+    bird.y += bird.velocityY;
+
+    //draw bird
+    context.save();
+    context.drawImage(birdImg, bird.x, bird.y, bird.width, bird.height);
+    context.restore();
+
     //draw base
-    context.drawImage(baseImg, 0, boardHeight*25/32, baseImg.width, baseImg.height)
+    context.drawImage(baseImg, 0, board.height*25/32, baseImg.width, baseImg.height)
 }
 
 function placePipes() 
 {
-    let randompipeY = pipeY - pipeHeight/4 - Math.random()*(pipeHeight/2)
-    let spacing = boardHeight/5
+    let randompipeY = -320/4 - Math.random()*(320/2)
+    let spacing = board.height/5
 
     let topPipe = 
     {
         img : toppipeImg,
-        x : pipeX,
+        x : board.width,
         y : randompipeY,
-        width : pipeWidth,
-        height: pipeHeight,
+        width : 52,
+        height: 320,
+        velocityX: -0.75,
         passed : false
     }
 
@@ -99,12 +111,27 @@ function placePipes()
     let botPipe = 
     {
         img : botpipeImg,
-        x : pipeX,
-        y : randompipeY + pipeHeight + spacing,
-        width : pipeWidth,
-        height: pipeHeight,
+        x : board.width,
+        y : randompipeY + 320 + spacing,
+        width : 52,
+        height: 320,
+        velocityX: -0.75,
         passed : false
     }
 
     pipeArray.push(botPipe)
+}
+
+function birdJump(b)    
+{
+    //button 0 is left mouse click; key code 32 is spacebar
+    if(b.keyCode == 32 || b.button == 0)
+    {
+        const birdJumpAud = new Audio("audio/wing.wav");
+
+        birdJumpAud.volume = volume;
+        birdJumpAud.play();
+    
+        bird.velocityY = -2.4;
+    }
 }
