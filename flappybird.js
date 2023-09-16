@@ -32,10 +32,12 @@ let gravity = 0.05;
 const volume = 0.35;
 const birdJumpAud = new Audio("audio/wing.wav");
 birdJumpAud.volume = volume;
-const gameOverAud = new Audio("audio/hit.wav");
-gameOverAud.volume = volume;
+const hitAud = new Audio("audio/hit.wav");
+hitAud.volume = volume;
 const pointAud = new Audio("audio/point.wav");
-gameOverAud.volume = volume;
+pointAud.volume = volume;
+const dieAud = new Audio("audio/die.wav");
+dieAud.volume = volume;
 
 let gameOver = false;
 
@@ -147,7 +149,7 @@ function update()
         if(detectcollision(bird, pipe))
         {
             gameOver = true;
-            gameOverAud.play();
+            hitAud.play();
         }
 
         if(pipe.passed == false && bird.x > pipe.x)
@@ -173,7 +175,7 @@ function update()
     if(bird.y + bird.height > board.height - base.height)
     {
         gameOver = true;
-        gameOverAud.play();
+        hitAud.play();
     }
 
     //calculate new bird y position after jumping + gravity
@@ -181,7 +183,7 @@ function update()
     //prevent bird from going too much out of top of the screen
     bird.y = Math.max(bird.y + bird.velocityY, -25);
 
-     // Accelerate the tilt angle upwards when jumping
+    // Accelerate the tilt angle upwards when jumping
     if (bird.velocityY < 0) 
     {
         bird.tiltAngle -= 1; // Increase tilt angle upwards
