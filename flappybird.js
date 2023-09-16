@@ -41,6 +41,8 @@ dieAud.volume = volume;
 
 let gameOver = false;
 
+let deathAnimation = false;
+
 //index for selecting bird flap animation
 let flapFrame = 0;
 
@@ -120,6 +122,29 @@ function update()
 {
     requestAnimationFrame(update);
 
+    if(deathAnimation)
+    {
+        //clear previous pixels to allow for drawing new images
+        context.clearRect(0, 0, board.width, board.height);
+
+        drawPipes(false);
+
+        drawScore();
+    
+        drawBird();
+
+        drawBase(false);
+
+        //check if bird hit the ground
+        if(bird.y + bird.height > board.height - base.height)
+        {
+            deathAnimation = false;
+            hitAud.play();
+        }
+
+        return;
+    }
+
     if(gameOver)
     {
         //draw intro message
@@ -139,17 +164,45 @@ function update()
     //clear previous pixels to allow for drawing new images
     context.clearRect(0, 0, board.width, board.height);
 
-    //draw pipes
+    drawPipes(true);
+
+    drawScore();
+
+    drawBird();
+
+    drawBase(true);
+
+    //check if bird hit the ground
+    if(bird.y + bird.height > board.height - base.height)
+    {
+        gameOver = true;
+        hitAud.play();
+    }
+
+    //clear pipes that are out of screen
+    while(pipeArray.length > 0 && pipeArray[0].x < -board.width/2)
+    {
+        pipeArray.shift();
+    }
+}
+
+function drawPipes(moving)
+{
     for (let i = 0; i < pipeArray.length; i++)
     {
         let pipe = pipeArray[i];
-        pipe.x += pipe.velocityX;
+        if(moving)
+        {
+            pipe.x += pipe.velocityX;
+        }
         context.drawImage(pipe.img, pipe.x, pipe.y, pipe.width, pipe.height);
 
-        if(detectcollision(bird, pipe))
+        if(detectcollision(bird, pipe) && !deathAnimation)
         {
             gameOver = true;
+            deathAnimation = true;
             hitAud.play();
+            dieAud.play();
         }
 
         if(pipe.passed == false && bird.x > pipe.x)
@@ -159,8 +212,10 @@ function update()
             pipe.passed = true;
         }
     }
+}
 
-    //draw score
+function drawScore()
+{
     let scoreCopy = score;
     var xpos = backgroundImg.width/2 + numbers[0].width*(score.toString().length*0.5 - 1);
     for (let i = 0; i < score.toString().length; i++)
@@ -170,19 +225,15 @@ function update()
         xpos -= numbers[0].width;
         scoreCopy = Math.floor(scoreCopy/10);
     }
+}
 
-    //check if bird hit the ground
-    if(bird.y + bird.height > board.height - base.height)
-    {
-        gameOver = true;
-        hitAud.play();
-    }
-
+function drawBird()
+{
     //calculate new bird y position after jumping + gravity
     bird.velocityY += gravity;
     //prevent bird from going too much out of top of the screen
     bird.y = Math.max(bird.y + bird.velocityY, -25);
-
+    
     // Accelerate the tilt angle upwards when jumping
     if (bird.velocityY < 0) 
     {
@@ -192,7 +243,7 @@ function update()
             bird.tiltAngle = -25;
         }
     }
-
+    
     // Rotate the bird downward if it's falling
     if (bird.velocityY > 0) 
     {
@@ -202,38 +253,32 @@ function update()
             bird.tiltAngle = 90;
         }
     }
-
-    //draw bird
+    
     context.save();
     context.translate(bird.x + bird.width / 2, bird.y + bird.height / 2);
     context.rotate((Math.PI / 180) * bird.tiltAngle);
     context.drawImage(birdImgs[flapFrame], -bird.width / 2, -bird.height / 2, bird.width, bird.height);
     context.restore();
+}
 
+function drawBase(moving)
+{
     //simulate base moving left
-    base.x += base.velocityX;
+    if(moving)
+    {
+        base.x += base.velocityX;
+    }
     if(base.x <= -board.width)
     {
         base.x = 0;
     }
-
+    
     //draw base
     context.drawImage(baseImg, base.x, board.height*25/32, base.width, base.height)
-
-    //clear pipes that are out of screen
-    while(pipeArray.length > 0 && pipeArray[0].x < -board.width/2)
-    {
-        pipeArray.shift();
-    }
 }
 
 function placePipes() 
 {
-    if (gameOver)
-    {
-        return;
-    }
-
     let randompipeY = -320/4 - Math.random()*(320/2);
     let spacing = board.height/5;
 
@@ -267,7 +312,7 @@ function placePipes()
 function birdJump(b)    
 {
     //button 0 is left mouse click; key code 32 is spacebar
-    if(b.button == 0 || b.keyCode == 32)
+    if(!(deathAnimation) && (b.button == 0 || b.keyCode == 32))
     {
         gameOver = false;
 
@@ -280,11 +325,6 @@ function birdJump(b)
 
 function flap()
 {
-    if (gameOver)
-    {
-        return;
-    }
-
     flapFrame = (flapFrame + 1) % 3;
 }
 
